@@ -4,8 +4,10 @@
 *.iws
 *.iml
 .idea
+.classpath
 target
 *.csv
 .DS_Store
 .settings
+data/*
 
