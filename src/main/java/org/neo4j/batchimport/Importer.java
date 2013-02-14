@@ -59,20 +59,20 @@ public class Importer {
                 System.err.println("Nodes file "+nodesFile+" does not exist");
             }
 
-            if (relationshipsFile.exists()) {
-                importer.importRelationships(new FileReader(relationshipsFile));
-            } else {
-                System.err.println("Relationships file "+relationshipsFile+" does not exist");
-            }
+//            if (relationshipsFile.exists()) {
+//                importer.importRelationships(new FileReader(relationshipsFile));
+//            } else {
+//                System.err.println("Relationships file "+relationshipsFile+" does not exist");
+//            }
 
 
-            for (int i = 3; i < args.length; i = i + 4) {
-                String elementType = args[i];
-                String indexName = args[i + 1];
-                String indexType = args[i + 2];
-                String indexFileName = args[i + 3];
-                importer.importIndex(elementType, indexName, indexType, indexFileName);
-            }
+//            for (int i = 3; i < args.length; i = i + 4) {
+//                String elementType = args[i];
+//                String indexName = args[i + 1];
+//                String indexType = args[i + 2];
+//                String indexFileName = args[i + 3];
+//                importer.importIndex(elementType, indexName, indexType, indexFileName);
+//            }
 		} finally {
             importer.finish();
         }
@@ -98,12 +98,14 @@ public class Importer {
 
     void importRelationships(Reader reader) throws IOException {
         BufferedReader bf = new BufferedReader(reader);
-        final RowData data = new RowData(bf.readLine(), "\t", 3);
+        System.out.println(bf.readLine());
+        final RowData data = new RowData(bf.readLine(), ",", 2);
         Object[] rel = new Object[3];
         final RelType relType = new RelType();
         String line;
         report.reset();
         while ((line = bf.readLine()) != null) {
+        	System.out.println(line );
             final Map<String, Object> properties = data.updateMap(line, rel);
             db.createRelationship(id(rel[0]), id(rel[1]), relType.update(rel[2]), properties);
             report.dots();

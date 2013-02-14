@@ -3,6 +3,7 @@ package org.neo4j.batchimport.importer;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.StringTokenizer;
+import org.apache.commons.lang.builder.ToStringBuilder;
 
 import static org.neo4j.helpers.collection.MapUtil.map;
 
@@ -13,18 +14,18 @@ public class RowData {
     private final String[] fields;
     private final String[] lineData;
     private final Type types[];
-    private final int lineSize;
-    private int dataSize;
+    private final int numColumns;
+    private int numColsToLoad;
     private int count;
 
     public RowData(String header, String delim, int offset) {
         this.offset = offset;
         this.delim = delim;
         fields = header.split(delim);
-        lineSize = fields.length;
+        numColumns = fields.length;
         types = parseTypes(fields);
-        lineData = new String[lineSize];
-        createMapData(lineSize, offset);
+        lineData = new String[numColumns];
+        createMapData(numColumns, offset);
     }
 
     public String[] getFields() {
@@ -32,19 +33,21 @@ public class RowData {
         return Arrays.copyOfRange(fields,offset,fields.length);
     }
 
-    private Object[] createMapData(int lineSize, int offset) {
-        dataSize = lineSize - offset;
-        data = new Object[dataSize*2];
-        for (int i = 0; i < dataSize; i++) {
+    private Object[] createMapData(int numColumns, int offset) {
+        numColsToLoad = numColumns - offset;
+        System.out.println("numColsToLoad is " + numColsToLoad);
+        data = new Object[numColsToLoad*2];
+        for (int i = 0; i < numColsToLoad; i++) {
             data[i * 2] = fields[i + offset];
+            System.out.println("data[" + i*2 + "]=" + data[i * 2]);
         }
         return data;
     }
 
     private Type[] parseTypes(String[] fields) {
-        Type[] types = new Type[lineSize];
+        Type[] types = new Type[numColumns];
         Arrays.fill(types, Type.STRING);
-        for (int i = 0; i < lineSize; i++) {
+        for (int i = 0; i < numColumns; i++) {
             String field = fields[i];
             int idx = field.indexOf(':');
             if (idx!=-1) {
@@ -57,13 +60,13 @@ public class RowData {
 
     private void parse(String line) {
         final StringTokenizer st = new StringTokenizer(line, delim,true);
-        for (int i = 0; i < lineSize; i++) {
+        for (int i = 0; i < numColumns; i++) {
             String value = st.hasMoreTokens() ? st.nextToken() : delim;
             if (value.equals(delim)) {
                 lineData[i] = null;
             } else {
                 lineData[i] = value.trim().isEmpty() ? null : value;
-                if (i< lineSize -1 && st.hasMoreTokens()) st.nextToken();
+                if (i< numColumns -1 && st.hasMoreTokens()) st.nextToken();
             }
         }
     }
@@ -71,7 +74,7 @@ public class RowData {
     public Object[] process(String line) {
         parse(line);
         count = 0;
-        for (int i=offset;i<lineSize;i++) {
+        for (int i=offset;i<numColumns;i++) {
             data[count++] = lineData[i] == null ? null : types[i].convert(lineData[i]);
         }
         return data;
@@ -80,7 +83,7 @@ public class RowData {
     private int split(String line) {
         parse(line);
         count = 0;
-        for (int i = offset; i < lineSize; i++) {
+        for (int i = offset; i < numColumns; i++) {
             if (lineData[i] == null) continue;
             data[count++]=fields[i];
             data[count++]=types[i].convert(lineData[i]);
@@ -89,12 +92,13 @@ public class RowData {
     }
 
     public Map<String,Object> updateMap(String line, Object... header) {
+    	//System.out.println(line);
         split(line);
         if (header.length > 0) {
             System.arraycopy(lineData, 0, header, 0, header.length);
         }
 
-        if (count == dataSize*2) {
+        if (count == numColsToLoad*2) {
             return map(data);
         }
         Object[] newData=new Object[count];
@@ -119,6 +123,6 @@ public class RowData {
     }
 
     public int getLineSize() {
-        return lineSize;
+        return numColumns;
     }
 }
