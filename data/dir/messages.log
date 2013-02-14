@@ -1,0 +1,2 @@
+2013-02-14 14:54:10.413+0000: Thread[main,5,main] Starting BatchInserter(EmbeddedBatchInserter[/Users/prem/work/code/neo-incr-batch-import/data/dir])
+2013-02-14 14:54:10.449+0000: Thread[main,5,main] Clean shutdown on BatchInserter(EmbeddedBatchInserter[/Users/prem/work/code/neo-incr-batch-import/data/dir])

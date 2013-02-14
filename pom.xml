@@ -1,7 +1,7 @@
 <project>
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.neo4j</groupId>
-    <artifactId>batch-import</artifactId>
+    <artifactId>neo-incr-batch-import</artifactId>
     <version>1.9-SNAPSHOT</version>
     <name>Neo4j Batch Importer</name>
     <properties>
@@ -73,7 +73,7 @@
                 <artifactId>maven-assembly-plugin</artifactId>
                 <configuration>
                     <finalName>
-                        batch-import
+                        neo-incr-batch-import
                     </finalName>
                     <archive>
                         <manifest>
