@@ -457,6 +457,10 @@ public class BatchInserterImpl implements BatchInserter
     {
         NodeRecord firstNode = getNodeRecord( node1 );
         NodeRecord secondNode = getNodeRecord( node2 );
+        //
+        String typename = type.name();
+       // typename = typeHolder.
+        //
         int typeId = typeHolder.getTypeId( type.name() );
         if ( typeId == -1 )
         {
@@ -853,6 +857,11 @@ public class BatchInserterImpl implements BatchInserter
         indexHolder.addPropertyIndex( stringKey, keyId );
         return keyId;
     }
+    
+//    private int createNewDynamicRelationshipType(String name ) 
+//    {
+//    	re
+//    }
 
     private int createNewRelationshipType( String name )
     {

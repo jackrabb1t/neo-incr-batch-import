@@ -15,10 +15,16 @@ import java.util.*;
 import static org.neo4j.index.impl.lucene.LuceneIndexImplementation.EXACT_CONFIG;
 import static org.neo4j.index.impl.lucene.LuceneIndexImplementation.FULLTEXT_CONFIG;
 
+/**
+ *things to pull into config : db location, csv files relative
+ * 3 - the actual columns beyond which they are props in relation.csv
+ *
+ */
 public class Importer {
     private static Report report;
     private BatchInserter db;
     private BatchInserterIndexProvider lucene;
+    private static final int REL_IMP_COLS = 3; // the rels file uses start, end & types
     
     public Importer(File graphDb) {
         Map<String, String> config = Utils.config();
@@ -52,18 +58,18 @@ public class Importer {
             FileUtils.deleteRecursively(graphDb);
         }
         Importer importer = new Importer(graphDb);
-        try {
+        try {              
             if (nodesFile.exists()) {
                 importer.importNodes(new FileReader(nodesFile));
             } else {
                 System.err.println("Nodes file "+nodesFile+" does not exist");
             }
 
-//            if (relationshipsFile.exists()) {
-//                importer.importRelationships(new FileReader(relationshipsFile));
-//            } else {
-//                System.err.println("Relationships file "+relationshipsFile+" does not exist");
-//            }
+            if (relationshipsFile.exists()) {
+                importer.importRelationships(new FileReader(relationshipsFile));
+            } else {
+                System.err.println("Relationships file "+relationshipsFile+" does not exist");
+            }
 
 
 //            for (int i = 3; i < args.length; i = i + 4) {
@@ -86,7 +92,7 @@ public class Importer {
 
     void importNodes(Reader reader) throws IOException {
         BufferedReader bf = new BufferedReader(reader);
-        final RowData data = new RowData(bf.readLine(), "\t", 0);
+        final RowData data = new RowData(bf.readLine());
         String line;
         report.reset();
         while ((line = bf.readLine()) != null) {
@@ -98,9 +104,9 @@ public class Importer {
 
     void importRelationships(Reader reader) throws IOException {
         BufferedReader bf = new BufferedReader(reader);
-        System.out.println(bf.readLine());
-        final RowData data = new RowData(bf.readLine(), ",", 2);
-        Object[] rel = new Object[3];
+        //System.out.println("rels header :" +bf.readLine());
+        final RowData data = new RowData(bf.readLine(),  REL_IMP_COLS);
+        Object[] rel = new Object[REL_IMP_COLS];
         final RelType relType = new RelType();
         String line;
         report.reset();

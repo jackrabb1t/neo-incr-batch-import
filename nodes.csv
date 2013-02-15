@@ -1,4 +1,6 @@
-name,age,works_on
-Michael,37,neo4j
-Selina,14,
-Rana,6,
+name	age	works_on
+Michael	37	neo4j
+Selina	14	
+Rana	6	
+Selma 	4	
+JunkRec	39	
