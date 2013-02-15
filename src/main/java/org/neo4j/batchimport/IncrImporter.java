@@ -16,17 +16,20 @@ import static org.neo4j.index.impl.lucene.LuceneIndexImplementation.EXACT_CONFIG
 import static org.neo4j.index.impl.lucene.LuceneIndexImplementation.FULLTEXT_CONFIG;
 
 /**
+ * An experimental version that should import incrementally - 
+ * if the nodes do not exist in the csv, the db should be queried
+ * 
  *things to pull into config : db location, csv files relative
  * 3 - the actual columns beyond which they are props in relation.csv
  *
  */
-public class Importer {
+public class IncrImporter {
     private static Report report;
     private BatchInserter db;
     private BatchInserterIndexProvider lucene;
     private static final int REL_IMP_COLS = 3; // the rels file uses start, end & types
     
-    public Importer(File graphDb) {
+    public IncrImporter(File graphDb) {
         Map<String, String> config = Utils.config();
                 
         db = createBatchInserter(graphDb, config);
@@ -48,9 +51,7 @@ public class Importer {
 
     public static void main(String[] args) throws IOException {
         if (args.length < 3) {
-            System.err.println("Usage java -jar batchimport.jar data/dir nodes.csv relationships.csv" +
-            		" [node_index node-index-name fulltext|exact nodes_index.csv " +
-            		"rel_index rel-index-name fulltext|exact rels_index.csv ....]");
+            System.err.println("Usage java -jar batchimport.jar <absolute db path> nodes.csv relationships.csv [node_index node-index-name fulltext|exact nodes_index.csv rel_index rel-index-name fulltext|exact rels_index.csv ....]");
         }
         File graphDb = new File(args[0]);
         File nodesFile = new File(args[1]);
@@ -59,7 +60,7 @@ public class Importer {
         if (graphDb.exists()) {
             FileUtils.deleteRecursively(graphDb);
         }
-        Importer importer = new Importer(graphDb);
+        IncrImporter importer = new IncrImporter(graphDb);
         try {              
             if (nodesFile.exists()) {
                 importer.importNodes(new FileReader(nodesFile));
@@ -74,13 +75,13 @@ public class Importer {
             }
 
 
-            for (int i = 3; i < args.length; i = i + 4) {
-                String elementType = args[i];
-                String indexName = args[i + 1];
-                String indexType = args[i + 2];
-                String indexFileName = args[i + 3];
-                importer.importIndex(elementType, indexName, indexType, indexFileName);
-            }
+//            for (int i = 3; i < args.length; i = i + 4) {
+//                String elementType = args[i];
+//                String indexName = args[i + 1];
+//                String indexType = args[i + 2];
+//                String indexFileName = args[i + 3];
+//                importer.importIndex(elementType, indexName, indexType, indexFileName);
+//            }
 		} finally {
             importer.finish();
         }
@@ -106,14 +107,12 @@ public class Importer {
 
     void importRelationships(Reader reader) throws IOException {
         BufferedReader bf = new BufferedReader(reader);
-        //System.out.println("rels header :" +bf.readLine());
         final RowData data = new RowData(bf.readLine(),  REL_IMP_COLS);
         Object[] rel = new Object[REL_IMP_COLS];
         final RelType relType = new RelType();
         String line;
         report.reset();
         while ((line = bf.readLine()) != null) {
-        	System.out.println(line );
             final Map<String, Object> properties = data.updateMap(line, rel);
             db.createRelationship(id(rel[0]), id(rel[1]), relType.update(rel[2]), properties);
             report.dots();

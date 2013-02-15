@@ -27,7 +27,6 @@ public class RowData {
      * @param offset, the columns beyond which they are properties
      */
     public RowData(String header, String delim, int offset) {
-    	System.out.println("header is " + header);
         this.offset = offset;
         this.delim = delim;
         lineDataHeaders = header.split(delim);
@@ -60,11 +59,9 @@ public class RowData {
 
     private Object[] createMapData(int numColumns, int offset) {
         numColsToLoad = numColumns - offset;
-        System.out.println("numColsToLoad is " + numColsToLoad);
         data = new Object[numColsToLoad*2];
         for (int i = 0; i < numColsToLoad; i++) {
             data[i * 2] = lineDataHeaders[i + offset];
-            System.out.println("data[" + i*2 + "]=" + data[i * 2]);
         }
         return data;
     }
@@ -109,7 +106,6 @@ public class RowData {
         parse(line);
         count = 0;
         for (int i = offset; i < numColumns; i++) {
-        	System.out.println("i is - " + i);
             if (lineDataValues[i] == null) continue;
             data[count++]=lineDataHeaders[i];
             data[count++]=dataTypes[i].convert(lineDataValues[i]);
@@ -124,7 +120,6 @@ public class RowData {
      * @return
      */
     public Map<String,Object> updateMap(String line, Object... header) {
-    	//System.out.println(line);
         split(line);
         if (header.length > 0) {
             System.arraycopy(lineDataValues, 0, header, 0, header.length);
