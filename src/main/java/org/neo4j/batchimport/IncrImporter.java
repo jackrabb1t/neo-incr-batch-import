@@ -51,7 +51,10 @@ public class IncrImporter {
 
     public static void main(String[] args) throws IOException {
         if (args.length < 3) {
-            System.err.println("Usage java -jar batchimport.jar <absolute db path> nodes.csv relationships.csv [node_index node-index-name fulltext|exact nodes_index.csv rel_index rel-index-name fulltext|exact rels_index.csv ....]");
+            System.err.println("Usage java -jar batchimport.jar " +
+            		"<absolute db path> nodes.csv relationships.csv " +
+            		"[node_index node-index-name fulltext|exact " +
+            		"nodes_index.csv rel_index rel-index-name fulltext|exact rels_index.csv ....]");
         }
         File graphDb = new File(args[0]);
         File nodesFile = new File(args[1]);
@@ -75,13 +78,13 @@ public class IncrImporter {
             }
 
 
-//            for (int i = 3; i < args.length; i = i + 4) {
-//                String elementType = args[i];
-//                String indexName = args[i + 1];
-//                String indexType = args[i + 2];
-//                String indexFileName = args[i + 3];
-//                importer.importIndex(elementType, indexName, indexType, indexFileName);
-//            }
+            for (int i = 3; i < args.length; i = i + 4) {
+                String elementType = args[i];
+                String indexName = args[i + 1];
+                String indexType = args[i + 2];
+                String indexFileName = args[i + 3];
+                importer.importIndex(elementType, indexName, indexType, indexFileName);
+            }
 		} finally {
             importer.finish();
         }
@@ -128,10 +131,20 @@ public class IncrImporter {
         Object[] node = new Object[1];
         String line;
         report.reset();
-        while ((line = bf.readLine()) != null) {        
-            final Map<String, Object> properties = data.updateMap(line, node);
-            index.add(id(node[0]), properties);
-            report.dots();
+        while ((line = bf.readLine()) != null) {  
+//        	try {
+                final Map<String, Object> properties = data.updateMap(line, node);
+//                System.out.println(properties.size());
+//                for (Map.Entry entry : properties.entrySet()) {
+//                    System.out.println(entry.getKey() + ", " + entry.getValue());
+//                }
+                index.add(id(node[0]), properties);
+                report.dots();				
+//			} catch (Exception e) {
+//				e.printStackTrace();
+//				// TODO: handle exception
+//			}
+
         }
                 
         report.finishImport("Done inserting into " + indexName + " Index");
@@ -150,7 +163,16 @@ public class IncrImporter {
     }
 
     private long id(Object id) {
-        return Long.parseLong(id.toString());
+    	Long l = null;
+    	try {
+            l = Long.parseLong(id.toString());
+
+		} catch (Exception e) {
+			// TODO: handle exception
+			System.out.println("unable to parse to Long: " + id);
+			e.printStackTrace();
+		}
+    	return l;
     }
 
     private void importIndex(String elementType, String indexName, String indexType, String indexFileName) throws IOException {
@@ -159,7 +181,8 @@ public class IncrImporter {
             System.err.println("Index file "+indexFile+" does not exist");
             return;
         }
-        BatchInserterIndex index = elementType.equals("node_index") ? nodeIndexFor(indexName, indexType) : relationshipIndexFor(indexName, indexType);
+        BatchInserterIndex index = elementType.equals("node_index") 
+        		? nodeIndexFor(indexName, indexType) : relationshipIndexFor(indexName, indexType);
         importIndex(indexName, index, new FileReader(indexFile));
     }
 }
