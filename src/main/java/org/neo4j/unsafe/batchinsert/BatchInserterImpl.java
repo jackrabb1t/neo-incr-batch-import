@@ -418,7 +418,17 @@ public class BatchInserterImpl implements BatchInserter
 
     private long internalCreateNode( long nodeId, Map<String, Object> properties )
     {
-        NodeRecord nodeRecord = new NodeRecord( nodeId, Record.NO_NEXT_RELATIONSHIP.intValue(), Record.NO_NEXT_PROPERTY.intValue() );
+//    	System.out.println("some testing");
+//    	//NodeStore foo = getNodeStore();
+//    	System.out.println(getNodeStore().getNumberOfIdsInUse());
+//    	System.out.println(getNodeStore().getHighestPossibleIdInUse() );
+//    	NodeRecord nr = getNodeStore().getRecord(1);
+    
+    	
+    	
+    	//
+        NodeRecord nodeRecord = new NodeRecord( nodeId, Record.NO_NEXT_RELATIONSHIP.intValue(), 
+        				Record.NO_NEXT_PROPERTY.intValue() );
         nodeRecord.setInUse(true);
         nodeRecord.setCreated();
         nodeRecord.setNextProp( createPropertyChain( properties ) );
